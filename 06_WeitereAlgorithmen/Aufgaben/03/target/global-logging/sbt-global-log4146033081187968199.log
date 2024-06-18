@@ -1,0 +1,13 @@
+[debug] > Exec({file:/C:/Users/cedzo/OneDrive/Desktop/TBZ/m323/06_WeitereAlgorithmen/Aufgaben/03/}root/run, None, None)
+[debug] Evaluating tasks: Compile / run
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[info] compiling 1 Scala source to C:\Users\cedzo\OneDrive\Desktop\TBZ\m323\06_WeitereAlgorithmen\Aufgaben\03\target\scala-2.13\classes ...
+[error] C:\Users\cedzo\OneDrive\Desktop\TBZ\m323\06_WeitereAlgorithmen\Aufgaben\03\src\main\scala\main.scala:4:1: expected class or object definition
+[error] def main(): Unit = {
+[error] ^
+[error] one error found
+[error] (Compile / compileIncremental) Compilation failed
+[error] Total time: 0 s, completed 18.06.2024, 10:10:10
+[debug] > Exec(idea-shell, None, None)
+[debug] > Exec(, None, None)
+[debug] > Exec(idea-shell, None, None)
