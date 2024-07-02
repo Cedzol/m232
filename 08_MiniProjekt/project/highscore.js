@@ -1,26 +1,23 @@
 const fs = require('fs');
 const filePath = './highScores.json';
+const prompt = require('prompt-sync')();
 
-// Pure function to add a new score to the list
 const addScore = (scores, name, score) => {
     const newScores = scores.concat({ name, score });
     return newScores;
 };
 
-// Pure function to sort scores in descending order
 const sortScores = (scores) => {
     const sortScores = scores.slice().sort((a, b) => b.score - a.score);
     return sortScores;
 };
 
-// Function to update the high score list in the file
 const updateHighScoresFile = (filePath, newScores) => {
     const sortedScores = sortScores(newScores);
     fs.writeFileSync(filePath, JSON.stringify(sortedScores, null, 2), 'utf8');
     return sortedScores;
 };
 
-// Function to read the current high scores from the file
 const readHighScores = (filePath) => {
     try {
         const data = fs.readFileSync(filePath, 'utf8');
@@ -30,30 +27,51 @@ const readHighScores = (filePath) => {
     }
 };
 
-// Main function to add a new score and update the file
-const main = (name, score) => {
+const logResults = (updatedScore) => {
+    console.log(updatedScore);
+}
+
+const checkExpression = (exp) => {
+    return typeof exp === 'string' || exp instanceof String
+}
+
+const checkNumber = (num) => {
+    return typeof Number(num) === 'number' && !isNaN(num);
+}
+
+const checkQuit = (input) => {
+    const lowInput = input.toLowerCase();
+    if (lowInput === 'quit' || lowInput === 'q' || lowInput === 'exit'){
+        throw 'Exited programm';
+    }
+}
+
+const getNameInput = () => {
+    const inputName = prompt("name: ");
+    checkQuit(inputName);
+    if (!checkExpression(inputName)){
+        console.log("Not a valid name")
+        main();
+    }
+    return inputName
+}
+
+const getScoreInput = () => {
+    const inputScore = prompt("score: ");
+    checkQuit(inputScore);
+    if (!checkNumber(inputScore)){
+        console.log("Not a number")
+        main();
+    }
+    return Number(inputScore);
+}
+
+const main = () => {
+    const name = getNameInput();
+    const score = getScoreInput();
     const currentScores = readHighScores(filePath);
     const newScores = addScore(currentScores, name, score);
     const updatedScores = updateHighScoresFile(filePath, newScores);
-    console.log('High Scores:', updatedScores);
+    logResults(updatedScores);
+    main();
 };
-
-// Example usage: add a new score
-const name = 'Ann';
-const score = 89;
-main(name, score);
-
-const name2 = 'Ben';
-const score2 = 92;
-
-main(name2, score2);
-
-const name3 = 'Alice';
-const score3 = 94;
-
-main(name3, score3)
-
-const name4 = 'Silvia';
-const score4 = 87;
-
-main(name4, score4);
