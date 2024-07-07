@@ -1,15 +1,55 @@
 const fs = require('fs');
-const filePath = './highScores.json';
 const prompt = require('prompt-sync')();
 
-const addScore = (scores, name, score) => {
-    const newScores = scores.concat({ name, score });
-    return newScores;
+const addScore = (scores, name, score, difficulty, date) => {
+    const existingScores = scores.filter(s => s.difficulty === difficulty);
+    if (existingScores.length < 10 || existingScores.some(s => s.score < score)) {
+        const newScores = existingScores.concat({ name, score, difficulty, date });
+        const sortedScores = newScores.sort((a, b) => b.score - a.score).slice(0, 10);
+        const otherScores = scores.filter(s => s.difficulty !== difficulty);
+        const finalScores = sortedScores.concat(otherScores);
+        const rank = findIndex(filterDifficulty(finalScores, difficulty), name, score, difficulty, date);
+        logRank(rank);
+        return finalScores;
+    } else {
+        const lowestScores = getLowestScore(existingScores)
+        insufficientScore(lowestScores);
+        main();
+        return scores;
+    }
 };
 
+const logRank = (rank) => {
+    console.log("Your rank: " + rank)
+}
+
+const insufficientScore = (lowestScore) => {
+    console.log("HighScore entries only better than " + lowestScore + " accepted");
+}
+
+const filterDifficulty = (scores, difficulty) => {
+    return scores.filter(s => s.difficulty === difficulty);
+}
+
+const findIndex = (scores, name, score, difficulty, date) => {
+    return scores.findIndex(s => s.name === name && s.score === score && s.difficulty === difficulty && s.date === date) + 1;
+}
+
+const getLowestScore = (scores) => {
+    return scores[scores.length -1].score;
+}
+
 const sortScores = (scores) => {
-    const sortScores = scores.slice().sort((a, b) => b.score - a.score);
-    return sortScores;
+    const difficultyOrder = ['Einfach', 'Mittel', 'Schwer', 'Genie'];
+    const difficultyRank = (difficulty) => difficultyOrder.indexOf(difficulty);
+
+    return scores.sort((a, b) => {
+        if (difficultyRank(a.difficulty) !== difficultyRank(b.difficulty)) {
+            return difficultyRank(a.difficulty) - difficultyRank(b.difficulty);
+        } else {
+            return b.score - a.score;
+        }
+    });
 };
 
 const updateHighScoresFile = (filePath, newScores) => {
@@ -26,10 +66,6 @@ const readHighScores = (filePath) => {
         return [];
     }
 };
-
-const logResults = (updatedScore) => {
-    console.log(updatedScore);
-}
 
 const checkExpression = (exp) => {
     return typeof exp === 'string' || exp instanceof String
@@ -65,13 +101,51 @@ const getScoreInput = () => {
     }
     return Number(inputScore);
 }
+const getDifficulty = () => {
+    const inputDifficulty = prompt("difficulty [Einfach, Mittel, Schwer, Genie]: ");
+    checkQuit(inputDifficulty);
+    return inputDifficulty;
+}
+
 
 const main = () => {
+    console.log("Menu")
+    console.log("1: Make new entry");
+    console.log("2: Sort entry");
+    const menuOption = prompt("")
+    checkNumber(menuOption);
+    if (Number(menuOption) === 1){
+        logEntry();
+    } else if (Number(menuOption) === 2){
+        sortEntry();
+    } else {
+        main();
+    }
+};
+
+const logEntry = () => {
+    const filePath = './highScores.json';
     const name = getNameInput();
     const score = getScoreInput();
+    const difficulty = getDifficulty();
+    const date = new Date();
     const currentScores = readHighScores(filePath);
-    const newScores = addScore(currentScores, name, score);
-    const updatedScores = updateHighScoresFile(filePath, newScores);
-    logResults(updatedScores);
+    const newScores = addScore(currentScores, name, score, difficulty, date);
+    updateHighScoresFile(filePath, newScores);
     main();
-};
+}
+
+const logSortedEntries = (entries) => {
+    console.log(entries);
+}
+
+const sortEntry = () => {
+    const filePath = './highScores.json';
+    const currentScores = readHighScores(filePath)
+    const difficulty = getDifficulty();
+    const filteredDifficulties = filterDifficulty(currentScores, difficulty);
+    logSortedEntries(filteredDifficulties);
+    main();
+}
+
+main();
